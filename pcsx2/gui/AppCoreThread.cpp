@@ -448,7 +448,7 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 		gameCheats.Printf(L" [%d Patches]", LoadPatchesFromDir(gameCRC, GetCheatsFolder(), L"Patches"));
 
 	if (fixup.EnableLua)
-		LoadScriptFromDir(gameCRC, GetLuaFolder(), L"Scripts");
+		gameCheats.Printf(L" [LUA Enabled]", LoadScriptFromDir(gameCRC, GetLuaFolder(), L"Scripts"));
 	
 	// wide screen patches
 	if (fixup.EnableWideScreenPatches)

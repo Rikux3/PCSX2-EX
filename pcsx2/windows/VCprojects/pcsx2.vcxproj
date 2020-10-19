@@ -413,6 +413,7 @@
     <ClCompile Include="LUAEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\System\config.hpp" />
     <ClInclude Include="..\..\AsyncFileReader.h" />
     <ClInclude Include="..\..\CDVD\ChunksCache.h" />
     <ClInclude Include="..\..\CDVD\CompressedFileReader.h" />

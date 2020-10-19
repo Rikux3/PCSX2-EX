@@ -1337,6 +1337,9 @@
     <ClInclude Include="..\..\System\sol.hpp">
       <Filter>System\Include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\System\config.hpp">
+      <Filter>System\Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\wxResources.rc">

@@ -23,7 +23,11 @@ namespace
 	{
 		return memRead32(Input);
 	}
-	std::vector<u8> Read04(u32 Input01, u32 Input02)
+	float Read04(u32 Input)
+	{
+		return (float)memRead32(Input);
+	}
+	std::vector<u8> Read05(u32 Input01, u32 Input02)
 	{
 		std::vector<u8> Value(Input02);
 
@@ -57,10 +61,16 @@ namespace
 		if (memRead32(Input01) != (u32)Input02)
 			memWrite32(Input01, (u32)Input02);
 	}
-
-	void Misc01(const char* Input)
+	void Write04(u32 Input01, float Input02)
 	{
-		Console.WriteLn(Input);
+		if (memRead32(Input01) != (u32)Input02)
+			memWrite32(Input01, (u32)Input02);
+	}
+
+	void Misc01(const char* Input, int Color = 1)
+	{
+		ConsoleColors _color = (ConsoleColors)Color;
+		Console.WriteLn(_color, Input);
 	}
 } // namespace
 
@@ -71,7 +81,8 @@ void ExportFunctionCalls()
 	LUAEngine.set_function("ReadByte", Read01);
 	LUAEngine.set_function("ReadUShort", Read02);
 	LUAEngine.set_function("ReadUInt", Read03);
-	LUAEngine.set_function("ReadArray", Read04);
+	LUAEngine.set_function("ReadFloat", Read04);
+	LUAEngine.set_function("ReadArray", Read05);
 
 	// Calculators
 	LUAEngine.set_function("GetPointer", Calc01);
@@ -80,6 +91,7 @@ void ExportFunctionCalls()
 	LUAEngine.set_function("WriteByte", Write01);
 	LUAEngine.set_function("WriteUShort", Write02);
 	LUAEngine.set_function("WriteUInt", Write03);
+	LUAEngine.set_function("WriteFloat", Write04);
 
 	// Misc
 	LUAEngine.set_function("Print", Misc01);
@@ -89,7 +101,17 @@ bool InitScript(wxString path, wxString ScriptTitle)
 {
 	Console.WriteLn(Color_Green, L"--> Initializing Script: \"%s\"", WX_STR(ScriptTitle));
 
-	LUAEngine.open_libraries(sol::lib::base, sol::lib::package);
+	LUAEngine.open_libraries
+	(
+		sol::lib::base,		 
+		sol::lib::package,
+		sol::lib::coroutine,
+		sol::lib::string,
+		sol::lib::os,
+		sol::lib::math,
+		sol::lib::table,
+		sol::lib::io
+	);
 
 	ExportFunctionCalls();
 	LUAEngine.do_file(path.ToStdString());
@@ -112,7 +134,7 @@ bool InitScript(wxString path, wxString ScriptTitle)
 bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxString& friendlyName)
 {
 	Console.WriteLn(Color_Black, L"");
-	Console.WriteLn(Color_StrongBlue, L"Initializing LUAEngine v0.1");
+	Console.WriteLn(Color_StrongBlue, L"Initializing LUAEngine v0.37");
 	Console.WriteLn(Color_Black, L"");
 
 	if (!folderName.Exists())
