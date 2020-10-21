@@ -6,6 +6,13 @@
 #include <iostream>
 #include <fstream>
 
+#include <memory>
+#include <vector>
+#include <wx/textfile.h>
+#include <wx/dir.h>
+#include <wx/txtstrm.h>
+#include <wx/zipstrm.h>
+
 using namespace sol;
 using namespace std;
 
@@ -17,7 +24,8 @@ wxString _rootPath;
 wxString _loadPath;
 wxString _dumpPath;
 
-int _luaVersion = 0x03;
+int _luaVersion = 0x05;
+wxString _notedCRC;
 
 namespace
 {
@@ -132,6 +140,14 @@ namespace
 		ConsoleColors _color = (ConsoleColors)Color;
 		Console.WriteLn(_color, Input);
 	}
+	int Misc02()
+	{
+		return _luaVersion;
+	}
+	string Misc03()
+	{
+		return _notedCRC.Upper().ToStdString();
+	}
 }
 
 
@@ -160,12 +176,12 @@ void ExportFunctionCalls()
 
 	// Misc
 	LUAEngine.set_function("Print", Misc01);
+	LUAEngine.set_function("GetVersion", Misc02);
+	LUAEngine.set_function("GetGameCode", Misc03);
 }
 
-bool InitScript(wxString path, wxString ScriptTitle)
+bool InitScript(wxString path, wxString crc32)
 {
-	Console.WriteLn(Color_Green, L"--> Initializing Script: \"%s\"", WX_STR(ScriptTitle));
-
 	LUAEngine.open_libraries
 	(
 		lib::base,		 
@@ -194,8 +210,7 @@ bool InitScript(wxString path, wxString ScriptTitle)
 	_loadPath = Path::Combine(Path::GetDirectory(path),  "io_load");
 	_dumpPath = Path::Combine(Path::GetDirectory(path), "io_dump");
 
-	Console.WriteLn(Color_Black, _loadPath);
-	Console.WriteLn(Color_Black, _dumpPath);
+	_notedCRC = crc32;
 
 	Console.WriteLn(Color_Green, L"--> Initialization Successful!");
 	Console.WriteLn(Color_Black, L"");
@@ -205,7 +220,7 @@ bool InitScript(wxString path, wxString ScriptTitle)
 bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxString& friendlyName)
 {
 	Console.WriteLn(Color_Black, L"");
-	Console.WriteLn(Color_StrongBlue, L"Initializing LUAEngine v0.37");
+	Console.WriteLn(Color_StrongBlue, L"Initializing LUAEngine v0.5");
 	Console.WriteLn(Color_Black, L"");
 
 	if (!folderName.Exists())
@@ -214,19 +229,19 @@ bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxStrin
 		return 0;
 	}
 
-	wxString PathString = Path::Combine(folderName, name.MakeUpper() + L".lua");
-	wxString LUAName = name.MakeUpper() + L".lua";
-	wxFileName FilePath(PathString);
+	wxString buffer;
+	wxDir dir(folderName.ToString());
+	wxString LUAName = "*" + name + L"*.lua";
 
-	if (!FilePath.Exists())
-	{
-		Console.WriteLn(Color_Red, L"--> LUA Script named \"%s\" not found! Aborting...", WX_STR(LUAName));
-		return 0;
+	bool found = dir.GetFirst(&buffer, L"*", wxDIR_FILES);
+
+	while (found) {
+		if (buffer.Upper().Matches(LUAName.Upper())) {
+			Console.WriteLn(Color_Green, L"--> Found LUA Script: '%s'! Initializing...", WX_STR(buffer));
+			return InitScript(Path::Combine(dir.GetName(), buffer), name);
+		}
+		found = dir.GetNext(&buffer);
 	}
-
-	Console.WriteLn(Color_Blue, L"--> Initialization Complete!");
-	Console.WriteLn(Color_Black, L"");
-	return InitScript(PathString, LUAName);
 }
 
 void ExecuteScript(script_place_type place)
