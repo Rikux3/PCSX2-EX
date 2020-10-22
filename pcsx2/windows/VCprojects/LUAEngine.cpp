@@ -24,7 +24,7 @@ wxString _rootPath;
 wxString _loadPath;
 wxString _dumpPath;
 
-int _luaVersion = 0x05;
+int _luaVersion = 0x06;
 wxString _notedCRC;
 
 namespace
@@ -43,7 +43,8 @@ namespace
 	}
 	float Read04(u32 Input)
 	{
-		return (float)memRead32(Input);
+		u32 _readMem = memRead32(Input);
+		return *reinterpret_cast<float*>(&_readMem);
 	}
 	vector<u8> Read05(u32 Input01, u32 Input02)
 	{
@@ -123,8 +124,11 @@ namespace
 	}
 	void Write04(u32 Input01, float Input02)
 	{
-		if (memRead32(Input01) != (u32)Input02)
-			memWrite32(Input01, (u32)Input02);
+		float _inp = Input02;
+		u32 _val = *reinterpret_cast<u32*>(&_inp);
+
+		if (memRead32(Input01) != (u32)_val)
+			memWrite32(Input01, (u32)_val);
 	}
 	void Write05(u32 Input01, vector<u8> Input02)
 	{
