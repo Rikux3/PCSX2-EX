@@ -32,6 +32,7 @@
 #include "Utilities/PageFaultSource.h"
 #include "Utilities/Threading.h"
 
+
 #ifdef __WXMSW__
 #	include <wx/msw/wrapwin.h>
 #endif
@@ -197,6 +198,7 @@ void SysCoreThread::_reset_stuff_as_needed()
 		m_resetVsyncTimers		= false;
 
 		ForgetLoadedPatches();
+		ForgetScripts();
 	}
 
 	if( m_resetVsyncTimers )

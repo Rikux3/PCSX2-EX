@@ -1,7 +1,9 @@
-#pragma once
+#ifndef LUA_HEAD
+#define LUA_HEAD
+
 #include "Pcsx2Types.h"
 
-enum script_place_type
+enum LUAExecutionTime
 {
 	SPT_ONCE_ON_LOAD = 0,
 	SPT_CONTINOUSLY = 1,
@@ -9,5 +11,8 @@ enum script_place_type
 	_SPT_END_MARKER
 };
 
-extern bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxString& friendlyName);
-extern void ExecuteScript(script_place_type place);
+extern void ForgetScripts();
+extern bool LoadScriptFromDir(wxString Input01, const wxDirName& Input02, const wxString& Input03);
+extern void ExecuteScript(LUAExecutionTime Input01);
+
+#endif

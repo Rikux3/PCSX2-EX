@@ -394,6 +394,7 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 	curGameKey = newGameKey;
 
 	ForgetLoadedPatches();
+	ForgetScripts();
 
 	if (!curGameKey.IsEmpty())
 	{
