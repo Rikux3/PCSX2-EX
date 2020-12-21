@@ -71,6 +71,25 @@ public:
 
 		return string(Value.begin(), Value.end());
 	}
+	static bool Read07(u32 Input)
+	{
+		switch (memRead8(Input))
+		{
+			case 0:
+				return false;
+			case 1:
+				return true;
+			default:
+				return NULL;
+		}
+	}
+	static u64 Read08(u32 Input)
+	{
+		u64 output;
+
+		memRead64(Input, &output);
+		return output;
+	}
 
 	static u32 Calc01(u32 Input01, u32 Input02)
 	{
@@ -115,6 +134,22 @@ public:
 
 		return _buffer;
 	}
+	static vector<u8> File03(const char* Input01, u32 Input02, u32 Input03)
+	{
+		wxString _location = Path::Combine(_loadPath, Input01);
+
+		ifstream _input(_location.ToStdString(), ios_base::binary);
+
+		size_t _length = Input03;
+		_input.seekg(Input02, std::ios_base::beg);
+
+		vector<u8> _buffer;
+		_buffer.reserve(_length);
+		copy(istreambuf_iterator<char>(_input), istreambuf_iterator<char>(), back_inserter(_buffer));
+
+		return _buffer;
+	}
+
 
 	static void Write01(u32 Input01, u8 Input02)
 	{
@@ -157,6 +192,28 @@ public:
 			Input01++;
 		}
 	}
+	static void Write07(u32 Input01, bool Input02)
+	{
+		switch (Input02)
+		{
+		case false:
+			memWrite8(Input01, 0);
+			break;
+		case true:
+			memWrite8(Input01, 1);
+			break;
+		}
+	}
+	static void Write08(u32 Input01, u64 Input02)
+	{
+		u64 _read;
+		u64 _val = Input02;
+
+		memRead64(Input01, &_read);
+
+		if (_read != (u64)Input02)
+			memWrite64(Input01, &_val);
+	}
 
 	static void Misc01(const char* Input, int Color = 1)
 	{
@@ -187,34 +244,38 @@ vector<LUAScript*> _loadedScripts;
 
 void LUAScript::SetFunctions()
 {
-		// Readers
-		luaState.set_function("ReadByte", Read01);
-		luaState.set_function("ReadShort", Read02);
-		luaState.set_function("ReadInt", Read03);
-		luaState.set_function("ReadFloat", Read04);
-		luaState.set_function("ReadArray", Read05);
-		luaState.set_function("ReadString", Read06);
+// Readers
+luaState.set_function("ReadByte", Read01);
+luaState.set_function("ReadShort", Read02);
+luaState.set_function("ReadInt", Read03);
+luaState.set_function("ReadFloat", Read04);
+luaState.set_function("ReadArray", Read05);
+luaState.set_function("ReadString", Read06);
+luaState.set_function("ReadBoolean", Read07);
+luaState.set_function("ReadLong", Read08);
 
-		// Calculators
-		luaState.set_function("GetPointer", Calc01);
+// Calculators
+luaState.set_function("GetPointer", Calc01);
 
-		// IO Operations
-		luaState.set_function("CreateDump", File01);
-		luaState.set_function("ReadFile", File02);
+// IO Operations
+luaState.set_function("CreateDump", File01);
+luaState.set_function("ReadFile", File02);
+luaState.set_function("ReadFileRange", File03);
 
-		// Writers
-		luaState.set_function("WriteByte", Write01);
-		luaState.set_function("WriteShort", Write02);
-		luaState.set_function("WriteInt", Write03);
-		luaState.set_function("WriteFloat", Write04);
-		luaState.set_function("WriteArray", Write05);
-		luaState.set_function("WriteString", Write06);
+// Writers
+luaState.set_function("WriteByte", Write01);
+luaState.set_function("WriteShort", Write02);
+luaState.set_function("WriteInt", Write03);
+luaState.set_function("WriteFloat", Write04);
+luaState.set_function("WriteArray", Write05);
+luaState.set_function("WriteString", Write06);
+luaState.set_function("WriteBoolean", Write07);
+luaState.set_function("WriteLong", Write08);
 
-
-		// Misc
-		luaState.set_function("Print", Misc01);
-		luaState.set_function("GetVersion", Misc02);
-		luaState.set_function("GetGameCode", Misc03);
+// Misc
+luaState.set_function("Print", Misc01);
+luaState.set_function("GetVersion", Misc02);
+luaState.set_function("GetChecksum", Misc03);
 	}
 
 LUAScript::LUAScript(wxString Input01, wxString Input02)
@@ -233,21 +294,24 @@ LUAScript::LUAScript(wxString Input01, wxString Input02)
 
 	SetFunctions();
 
-	_version = 0x0507;
+	const string _packagePath = luaState["package"]["path"];
+	luaState["package"]["path"] = Path::Combine(Path::GetDirectory(Input01), "io_packages/").ToStdString() + "?.lua";
+
+	_version = 0x0508;
 	luaState.do_file(Input01.ToStdString());
 
 	initFunction = luaState["_OnInit"];
 	frameFunction = luaState["_OnFrame"];
 
 	if (!initFunction)
-		Console.WriteLn(Color_Red, L"LUAEngine: The \"_OnInit\" function either has errors or does not exist.\n");
+		Console.WriteLn(Color_Red, L"LUAEngine: The \"_OnInit\" function either has errors or does not exist.");
 
 	if (!frameFunction)
-		Console.WriteLn(Color_Red, L"LUAEngine: The \"_OnFrame\" function either has errors or does not exist.\n");
+		Console.WriteLn(Color_Red, L"LUAEngine: The \"_OnFrame\" function either has errors or does not exist.");
 
 	if (!initFunction && !frameFunction)
 	{
-		Console.WriteLn(Color_Red, L"LUAEngine: Both the \"_OnInit\" and \"_OnFrame\" functions either have errors or do not exist!\n");
+		Console.WriteLn(Color_Red, L"\nLUAEngine: Both the \"_OnInit\" and \"_OnFrame\" functions either have errors or do not exist!");
 		Console.WriteLn(Color_Red, L"LUAEngine: Initialization of this script cannot continue...");
 		return;
 	}
@@ -264,21 +328,27 @@ LUAScript::LUAScript(wxString Input01, wxString Input02)
 void ForgetScripts()
 {
 	_scriptNames.clear();
+
+	for (auto&& _p : _loadedScripts)
+		delete(_p);
+
 	_loadedScripts.clear();
 }
-bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxString& friendlyName)
+
+int LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxString& friendlyName)
 {
 	Console.WriteLn(Color_Black, L"");
-	Console.WriteLn(Color_StrongBlue, L"Initializing LUAEngine v1.25");
+	Console.WriteLn(Color_StrongBlue, L"Initializing LUAEngine v1.40");
 	Console.WriteLn(Color_Black, L"");
 
 	if (!folderName.Exists())
 	{
 		Console.WriteLn(Color_Red, L"LUAEngine: The \"lua\" folder does not exist! Aborting Initialization...");
-		return false;
+		return -1;
 	}
 
 	int _interval = 0;
+	int _loaded = 0;
 
 	wxString _buffer;
 	wxString _luaName = "*" + name + L"*.lua";
@@ -304,6 +374,7 @@ bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxStrin
 					Console.WriteLn(Color_Green, L"LUAEngine: Found LUA Script: '%s'! Initializing...", WX_STR(_buffer));
 					_scriptNames.push_back(_buffer);
 					_loadedScripts.push_back(new LUAScript(Path::Combine(_dirName.GetName(), _buffer), name));
+					_loaded++;
 				}
 			}
 			
@@ -312,6 +383,7 @@ bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxStrin
 				Console.WriteLn(Color_Green, L"LUAEngine: Found LUA Script: '%s'! Initializing...", WX_STR(_buffer));
 				_scriptNames.push_back(_buffer);
 				_loadedScripts.push_back(new LUAScript(Path::Combine(_dirName.GetName(), _buffer), name));
+				_loaded++;
 			}
 
 			_interval++;
@@ -319,6 +391,11 @@ bool LoadScriptFromDir(wxString name, const wxDirName& folderName, const wxStrin
 
 		_found = _dirName.GetNext(&_buffer);
 	}
+
+	if (_loaded == 0)
+		Console.WriteLn(Color_Orange, L"LUAEngine: No LUA Scripts were found for this game.", WX_STR(_buffer));
+
+	return _loaded;
 }
 void ExecuteScript(LUAExecutionTime Input01)
 {

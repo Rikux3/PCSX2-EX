@@ -12,7 +12,7 @@ enum LUAExecutionTime
 };
 
 extern void ForgetScripts();
-extern bool LoadScriptFromDir(wxString Input01, const wxDirName& Input02, const wxString& Input03);
+extern int LoadScriptFromDir(wxString Input01, const wxDirName& Input02, const wxString& Input03);
 extern void ExecuteScript(LUAExecutionTime Input01);
 
 #endif

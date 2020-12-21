@@ -369,6 +369,7 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 	wxString gameCRC;
 	wxString gameSerial;
 	wxString gamePatch;
+	wxString gameScript;
 	wxString gameFixes;
 	wxString gameCheats;
 	wxString gameWsHacks;
@@ -449,14 +450,24 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 		gameCheats.Printf(L" [%d Patches]", LoadPatchesFromDir(gameCRC, GetCheatsFolder(), L"Patches"));
 
 	if (fixup.EnableLua)
-		LoadScriptFromDir(gameCRC, GetLuaFolder(), L"Scripts");
+	{
+		int _load = LoadScriptFromDir(gameCRC, GetLuaFolder(), L"Scripts");
+
+		if (_load > 0)
+			gameScript.Printf(L" [%d Scripts]", _load);
+
+		else if (_load == -1)
+			gameScript.Printf(L" [Lua: ERROR]", _load);
+	}
+
 	
 	// wide screen patches
 	if (fixup.EnableWideScreenPatches)
 	{
 		if (int numberLoadedWideScreenPatches = LoadPatchesFromDir(gameCRC, GetCheatsWsFolder(), L"Widescreen hacks"))
 		{
-			gameWsHacks.Printf(L" [%d widescreen hacks]", numberLoadedWideScreenPatches);
+			if (numberLoadedWideScreenPatches > 0)
+				gameWsHacks.Printf(L" [%d 16:9 Patches]", numberLoadedWideScreenPatches);
 			Console.WriteLn(Color_Gray, "Found widescreen patches in the cheats_ws folder --> skipping cheats_ws.zip");
 		}
 		else
@@ -464,8 +475,10 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 			// No ws cheat files found at the cheats_ws folder, try the ws cheats zip file.
 			wxString cheats_ws_archive = Path::Combine(PathDefs::GetProgramDataDir(), wxFileName(L"cheats_ws.zip"));
 			int numberDbfCheatsLoaded = LoadPatchesFromZip(gameCRC, cheats_ws_archive);
-			PatchesCon->WriteLn(Color_Green, "(Wide Screen Cheats DB) Patches Loaded: %d", numberDbfCheatsLoaded);
-			gameWsHacks.Printf(L" [%d widescreen hacks]", numberDbfCheatsLoaded);
+			PatchesCon->WriteLn(Color_Green, "[WSDB] Patches Loaded: %d", numberDbfCheatsLoaded);
+
+			if (numberLoadedWideScreenPatches > 0)
+				gameWsHacks.Printf(L" [%d 16:9 Patches]", numberLoadedWideScreenPatches);
 		}
 	}
 
@@ -473,7 +486,7 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 	// to most users - with region, version, etc, so don't overwrite it with patch info. That's OK. Those
 	// users which want to know the status of the patches at the bios can check the console content.
 	wxString consoleTitle = gameName + gameSerial;
-	consoleTitle += L" [" + gameCRC.MakeUpper() + L"]" + gameCompat + gameFixes + gamePatch + gameCheats + gameWsHacks;
+	consoleTitle += L" [" + gameCRC.MakeUpper() + L"]" + gameCompat + gameFixes + gamePatch + gameCheats + gameScript + gameWsHacks;
 	if (ingame)
 		Console.SetTitle(consoleTitle);
 

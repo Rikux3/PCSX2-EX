@@ -519,6 +519,14 @@ void handle_extended_t(IniPatch* p)
 										if (mem16 < cond16)
 											SkipCount = skip / 0x10000;
 										break;
+									case 0x40000000:
+										if (mem16 >= cond16)
+											SkipCount = skip / 0x10000;
+										break;
+									case 0x50000000:
+										if (mem16 <= cond16)
+											SkipCount = skip / 0x10000;
+										break;
 								}
 							}
 							break;
@@ -541,6 +549,14 @@ void handle_extended_t(IniPatch* p)
 										break;
 									case 0x30000000:
 										if (mem8 < cond8)
+											SkipCount = skip / 0x10000;
+										break;
+									case 0x40000000:
+										if (mem8 >= cond8)
+											SkipCount = skip / 0x10000;
+										break;
+									case 0x50000000:
+										if (mem8 <= cond8)
 											SkipCount = skip / 0x10000;
 										break;
 								}
