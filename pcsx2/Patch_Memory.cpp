@@ -246,7 +246,7 @@ void handle_extended_t(IniPatch* p)
 								u32 comp1 = memRead32(PrevCheatAddr);
 								u32 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
 
-								if (comp1 > comp2)
+								if (comp1 >= comp2)
 									SkipCount = skipLines;
 							}
 							break;
@@ -255,7 +255,7 @@ void handle_extended_t(IniPatch* p)
 								u16 comp1 = memRead16(PrevCheatAddr);
 								u16 comp2 = memRead16((u32)p->addr & 0x0FFFFFFF);
 
-								if (comp1 > comp2)
+								if (comp1 >= comp2)
 									SkipCount = skipLines;
 							}
 							break;
@@ -264,7 +264,7 @@ void handle_extended_t(IniPatch* p)
 								u8 comp1 = memRead32(PrevCheatAddr);
 								u8 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
 
-								if (comp1 > comp2)
+								if (comp1 >= comp2)
 									SkipCount = skipLines;
 							}
 							break;
@@ -280,7 +280,7 @@ void handle_extended_t(IniPatch* p)
 								u32 comp1 = memRead32(PrevCheatAddr);
 								u32 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
 
-								if (comp1 < comp2)
+								if (comp1 <= comp2)
 									SkipCount = skipLines;
 							}
 							break;
@@ -289,7 +289,7 @@ void handle_extended_t(IniPatch* p)
 								u16 comp1 = memRead16(PrevCheatAddr);
 								u16 comp2 = memRead16((u32)p->addr & 0x0FFFFFFF);
 
-								if (comp1 < comp2)
+								if (comp1 <= comp2)
 									SkipCount = skipLines;
 							}
 							break;
@@ -298,10 +298,78 @@ void handle_extended_t(IniPatch* p)
 								u8 comp1 = memRead32(PrevCheatAddr);
 								u8 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
 
-								if (comp1 < comp2)
+								if (comp1 <= comp2)
 									SkipCount = skipLines;
 							}
 							break;
+						}
+					}
+					break;
+					case 0x4000000:
+					{
+						switch (typeData)
+						{
+						case 0x00000000:
+						{
+							u32 comp1 = memRead32(PrevCheatAddr);
+							u32 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
+
+							if (comp1 > comp2)
+								SkipCount = skipLines;
+						}
+						break;
+						case 0x10000000:
+						{
+							u16 comp1 = memRead16(PrevCheatAddr);
+							u16 comp2 = memRead16((u32)p->addr & 0x0FFFFFFF);
+
+							if (comp1 > comp2)
+								SkipCount = skipLines;
+						}
+						break;
+						case 0x20000000:
+						{
+							u8 comp1 = memRead32(PrevCheatAddr);
+							u8 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
+
+							if (comp1 > comp2)
+								SkipCount = skipLines;
+						}
+						break;
+						}
+					}
+					break;
+					case 0x5000000:
+					{
+						switch (typeData)
+						{
+						case 0x00000000:
+						{
+							u32 comp1 = memRead32(PrevCheatAddr);
+							u32 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
+
+							if (comp1 < comp2)
+								SkipCount = skipLines;
+						}
+						break;
+						case 0x10000000:
+						{
+							u16 comp1 = memRead16(PrevCheatAddr);
+							u16 comp2 = memRead16((u32)p->addr & 0x0FFFFFFF);
+
+							if (comp1 < comp2)
+								SkipCount = skipLines;
+						}
+						break;
+						case 0x20000000:
+						{
+							u8 comp1 = memRead32(PrevCheatAddr);
+							u8 comp2 = memRead32((u32)p->addr & 0x0FFFFFFF);
+
+							if (comp1 < comp2)
+								SkipCount = skipLines;
+						}
+						break;
 						}
 					}
 					break;
@@ -473,10 +541,18 @@ void handle_extended_t(IniPatch* p)
 									SkipCount = 1;
 								break;
 							case 0x00200000:
-								if (mem > (0x0000FFFF & (u32)p->data))
+								if (mem >= (0x0000FFFF & (u32)p->data))
 									SkipCount = 1;
 								break;
 							case 0x00300000:
+								if (mem <= (0x0000FFFF & (u32)p->data))
+									SkipCount = 1;
+								break;
+							case 0x00400000:
+								if (mem > (0x0000FFFF & (u32)p->data))
+									SkipCount = 1;
+								break;
+							case 0x00500000:
 								if (mem < (0x0000FFFF & (u32)p->data))
 									SkipCount = 1;
 								break;
@@ -512,19 +588,19 @@ void handle_extended_t(IniPatch* p)
 											SkipCount = skip / 0x10000;
 										break;
 									case 0x20000000:
-										if (mem16 > cond16)
-											SkipCount = skip / 0x10000;
-										break;
-									case 0x30000000:
-										if (mem16 < cond16)
-											SkipCount = skip / 0x10000;
-										break;
-									case 0x40000000:
 										if (mem16 >= cond16)
 											SkipCount = skip / 0x10000;
 										break;
-									case 0x50000000:
+									case 0x30000000:
 										if (mem16 <= cond16)
+											SkipCount = skip / 0x10000;
+										break;
+									case 0x40000000:
+										if (mem16 > cond16)
+											SkipCount = skip / 0x10000;
+										break;
+									case 0x50000000:
+										if (mem16 < cond16)
 											SkipCount = skip / 0x10000;
 										break;
 								}
@@ -544,19 +620,19 @@ void handle_extended_t(IniPatch* p)
 											SkipCount = skip / 0x10000;
 										break;
 									case 0x20000000:
-										if (mem8 > cond8)
-											SkipCount = skip / 0x10000;
-										break;
-									case 0x30000000:
-										if (mem8 < cond8)
-											SkipCount = skip / 0x10000;
-										break;
-									case 0x40000000:
 										if (mem8 >= cond8)
 											SkipCount = skip / 0x10000;
 										break;
-									case 0x50000000:
+									case 0x30000000:
 										if (mem8 <= cond8)
+											SkipCount = skip / 0x10000;
+										break;
+									case 0x40000000:
+										if (mem8 > cond8)
+											SkipCount = skip / 0x10000;
+										break;
+									case 0x50000000:
+										if (mem8 < cond8)
 											SkipCount = skip / 0x10000;
 										break;
 								}
