@@ -370,8 +370,8 @@ void MainEmuFrame::CreatePcsx2Menu()
 	m_GameSettingsSubmenu.Append(MenuId_EnableCheats,	_("Enable &Cheats"),
 		wxEmptyString, wxITEM_CHECK);
 
-	m_GameSettingsSubmenu.Append(MenuId_EnableLua, _("Enable &LUAEngine"),
-		_("Allows LUA Scripts to be run in game."), wxITEM_CHECK);
+	m_GameSettingsSubmenu.Append(MenuId_EnableLua, _("Enable &LuaEngine"),
+		_("Allows Lua Scripts to be run in game."), wxITEM_CHECK);
 
 	m_GameSettingsSubmenu.Append(MenuId_EnableWideScreenPatches,	_("Enable &Widescreen Patches"),
 		_("Enabling Widescreen Patches may occasionally cause issues."), wxITEM_CHECK);
@@ -547,7 +547,7 @@ MainEmuFrame::MainEmuFrame(wxWindow* parent, const wxString& title)
 	wxSize backsize(m_background->GetBitmap().GetWidth(), m_background->GetBitmap().GetHeight());
 
 	wxString wintitle;
-	wintitle.Printf(L"PCSX2-EX v2.00.0 [Base v1.7.0]");
+	wintitle.Printf(L"PCSX2-EX v2.00.5 [Base v1.7.0]");
 
 
 	SetTitle( wintitle );
