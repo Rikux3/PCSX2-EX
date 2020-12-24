@@ -873,7 +873,13 @@
     <ClCompile Include="..\..\Patch_Memory.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="LUAEngine.cpp">
+    <ClCompile Include="..\..\LuaEngine.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\LuaPS2.h">
+      <Filter>System\Include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\LuaPS2.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1328,9 +1334,6 @@
     <ClInclude Include="..\..\Patch.h">
       <Filter>System\Include</Filter>
     </ClInclude>
-    <ClInclude Include="LUAEngine.h">
-      <Filter>System\Include</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\System\forward.hpp">
       <Filter>System\Include</Filter>
     </ClInclude>
@@ -1338,6 +1341,9 @@
       <Filter>System\Include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\System\config.hpp">
+      <Filter>System\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\LuaEngine.h">
       <Filter>System\Include</Filter>
     </ClInclude>
   </ItemGroup>
