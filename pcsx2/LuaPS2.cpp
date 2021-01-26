@@ -17,13 +17,15 @@ LuaPS2::LuaPS2(wxString Input01, u32 Input02)
 		lib::os,
 		lib::math,
 		lib::table,
-		lib::io
+		lib::io,
+		lib::bit32,
+		lib::utf8
 	);
 
 	SetFunctions();
 
-	const string _packagePath = luaState["package"]["path"];
 	luaState["package"]["path"] = Path::Combine(Path::GetDirectory(Input01), "io_packages/").ToStdString() + "?.lua";
+	luaState["package"]["cpath"] = Path::Combine(Path::GetDirectory(Input01), "io_packages/").ToStdString() + "?.dll";
 
 	_version = 0x0600;
 	luaState.do_file(Input01.ToStdString());
